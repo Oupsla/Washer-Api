@@ -150,7 +150,9 @@ paths:
         '200':
           description: unexpected error
           schema:
-            $ref: '#/definitions/namesWasher'
+            type: array
+            items:
+              $ref: '#/definitions/user'
         default:
           description: unexpected error
           schema:
@@ -194,10 +196,6 @@ definitions:
     properties:
       name:
         type: string
-  namesWasher:
-    type: array
-    items:
-      type: string
   errorModel:
     type: object
     required:

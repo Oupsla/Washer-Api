@@ -15,7 +15,7 @@ class UserModel extends Model {
 
     fetchNames(){
       return userSchema
-      .find({}, {'name': 1, '_id': 0})
+      .find({}, {'name': 1, '_id': 1})
       .exec();
     }
 }
