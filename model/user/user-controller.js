@@ -38,7 +38,7 @@ function checkParam(req, params) {
 
 
 function selectNext(collection){
-  
+
   var arrayUser = [];
   collection.forEach(function(user){
     arrayUser.push(user.name);
@@ -55,10 +55,9 @@ function selectNext(collection){
     return arrayUser[0];
   }
 
-  // Retrieve the washer in the array and set the next
+  // Retrieve the washer in the array and select the next
   const indexNext = (arrayUser.indexOf(lastWasher) + 1) % arrayUser.length;
   const nameNext = arrayUser[indexNext];
-  fs.writeFileSync('./nextWasher', nameNext);
   return nameNext;
 }// END: selectNext
 
@@ -71,6 +70,7 @@ class UserController extends Controller {
     if (resCheck.code !== 200) {
       res.status(resCheck.code).send(resCheck.message);
     } else {
+      fs.writeFileSync('./nextWasher', req.body.name);
       return userFacade.insertWasher(req.body.name)
       .then(doc => res.status(201).json(doc))
       .catch(err => next(err));

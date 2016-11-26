@@ -65,7 +65,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /users/id/{id}:
+  /user/id/{id}:
     get:
       description: Returns a user based on a single ID
       operationId: findUserById
@@ -104,6 +104,58 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
+  /user/washer:
+    get:
+      description: Returns the next washer
+      operationId: findNextWasher
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: next washer name
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+    post:
+      description: Post a new wash done
+      operationId: postNewWash
+      produces:
+        - application/json
+      parameters:
+        - name: wash
+          in: body
+          description: Wash done to add
+          required: true
+          schema:
+            $ref: '#/definitions/newWasher'
+      responses:
+        '200':
+          description: user response
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /user/names:
+    get:
+      description: Returns the names of all washers
+      operationId: fetchNames
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/namesWasher'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
 definitions:
   listWasherDone:
     type: array
@@ -135,6 +187,17 @@ definitions:
     properties:
       name:
         type: string
+  newWasher:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+  namesWasher:
+    type: array
+    items:
+      type: string
   errorModel:
     type: object
     required:
