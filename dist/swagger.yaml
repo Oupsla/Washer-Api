@@ -65,7 +65,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /users/{id}:
+  /users/id/{id}:
     get:
       description: Returns a user based on a single ID
       operationId: findUserById

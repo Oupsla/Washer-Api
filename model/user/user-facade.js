@@ -7,9 +7,15 @@ class UserModel extends Model {
 
       // We will insert a empty object, because mongoose will set the
       // time at the server time
-      return this.Schema
+      return userSchema
       .findOne({name: nameUser})
       .update({$push: {'listWasherDone': {}}})
+      .exec();
+    }
+
+    fetchNames(){
+      return userSchema
+      .find({}, {'name': 1, '_id': 0})
       .exec();
     }
 }

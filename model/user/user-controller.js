@@ -1,7 +1,8 @@
 const Controller = require('../../lib/controller');
-const userFacade  = require('./user-facade');
+const userFacade = require('./user-facade');
 const util       = require('util');
 const _          = require('underscore')._;
+const fs         = require('fs');
 
 
 const findSchema = {
@@ -35,6 +36,32 @@ function checkParam(req, params) {
   return { message: null, code: 200 };
 }// END: checkParam
 
+
+function selectNext(collection){
+  
+  var arrayUser = [];
+  collection.forEach(function(user){
+    arrayUser.push(user.name);
+  });
+  arrayUser = arrayUser.sort();
+
+  if(arrayUser.length === 0)
+    return "No user registered in db";
+
+  // Get the last washer in the file
+  let lastWasher = fs.readFileSync('./nextWasher', 'utf8').trim();
+  if(!lastWasher){
+    fs.writeFileSync('./nextWasher', arrayUser[0]);
+    return arrayUser[0];
+  }
+
+  // Retrieve the washer in the array and set the next
+  const indexNext = (arrayUser.indexOf(lastWasher) + 1) % arrayUser.length;
+  const nameNext = arrayUser[indexNext];
+  fs.writeFileSync('./nextWasher', nameNext);
+  return nameNext;
+}// END: selectNext
+
 class UserController extends Controller {
 
   newWasher(req, res, next){
@@ -50,6 +77,21 @@ class UserController extends Controller {
     }
 
   }// END: newWasher
+
+  getNext(req, res, next){
+    return userFacade.fetchNames()
+    .then(function(collection){
+      return selectNext(collection);
+    })
+    .then(collection => res.status(200).json(collection))
+    .catch(err => next(err));
+  }// END: getNext
+
+  fetchNames(req, res, next){
+    return userFacade.fetchNames()
+    .then(collection => res.status(200).json(collection))
+    .catch(err => next(err));
+  }// END: fetchNames
 }
 
 module.exports = new UserController(userFacade);
