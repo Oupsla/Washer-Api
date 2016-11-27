@@ -37,13 +37,18 @@ function checkParam(req, params) {
 }// END: checkParam
 
 
-function selectNext(collection){
-
-  var arrayUser = [];
+function collectionToArrayName(collection){
+  let arrayUser = [];
   collection.forEach(function(user){
     arrayUser.push(user.name);
   });
   arrayUser = arrayUser.sort();
+
+  return arrayUser;
+}
+function selectNext(collection){
+
+  let arrayUser = collectionToArrayName(collection);
 
   if(arrayUser.length === 0)
     return "No user registered in db";
@@ -70,8 +75,22 @@ class UserController extends Controller {
     if (resCheck.code !== 200) {
       res.status(resCheck.code).send(resCheck.message);
     } else {
-      fs.writeFileSync('./nextWasher', req.body.name);
-      return userFacade.insertWasher(req.body.name)
+
+      return userFacade.fetchNames()
+      .then(function(collection){
+
+        var arrayUser = collectionToArrayName(collection);
+
+        //User not found
+        if(arrayUser.indexOf(req.body.name) === -1){
+          res.status(400).send('No user found with this name');
+          return;
+        } else {
+          fs.writeFileSync('./nextWasher', req.body.name);
+          return req.body.name;
+        }
+      })
+      .then(username => userFacade.insertWasher(username))
       .then(doc => res.status(201).json(doc))
       .catch(err => next(err));
     }
