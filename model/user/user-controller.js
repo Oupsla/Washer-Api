@@ -68,6 +68,62 @@ function selectNext(collection){
 
 class UserController extends Controller {
 
+  getHistory(req, res, next){
+    return userFacade.find({})
+    .then(function(collection){
+
+      var arrayUser = [];
+
+      // Settings dates
+      const dateNow = new Date();
+      const dateWeek = new Date();
+      dateWeek.setDate(dateWeek.getDate()-2);
+      const dateMonth = new Date();
+      dateMonth.setDate(dateMonth.getDate()-30);
+
+      // Computing date and create user to send
+      collection.forEach(function(user) {
+
+        const totalCount = user.listWasherDone.length;
+        const totalMonth = user.listWasherDone.filter(function (el) {
+          let date = new Date(el.time);
+          return date >= dateMonth;
+        }).length;
+        const totalWeek = user.listWasherDone.filter(function (el) {
+          let date = new Date(el.time);
+          return date >= dateWeek;
+        }).length;
+
+        let userToSend = {};
+        userToSend._id = user._id;
+        userToSend.name = user.name;
+        userToSend.__v = user.__v;
+        userToSend.totalCount = totalCount;
+        userToSend.totalMonth = totalMonth;
+        userToSend.totalWeek = totalWeek;
+        arrayUser.push(userToSend);
+      });
+      return arrayUser;
+    })
+    .then(collection => res.status(200).json(collection))
+    .catch(err => next(err));
+  }
+
+  getNext(req, res, next){
+    return userFacade.fetchNames()
+    .then(function(collection){
+      return selectNext(collection);
+    })
+    .then(collection => res.status(200).json(collection))
+    .catch(err => next(err));
+  }// END: getNext
+
+  fetchNames(req, res, next){
+    return userFacade.fetchNames()
+    .then(collection => res.status(200).json(collection))
+    .catch(err => next(err));
+  }// END: fetchNames
+
   newWasher(req, res, next){
 
     const resCheck = checkParam(req, req.body);
@@ -91,26 +147,21 @@ class UserController extends Controller {
         }
       })
       .then(username => userFacade.insertWasher(username))
-      .then(doc => res.status(201).json(doc))
+      .then(function(doc){
+
+        var name =  userFacade.fetchNames()
+        .then(function(collection){
+          var name = selectNext(collection);
+          console.log(name);
+          return res.status(201).json(name);
+        });
+
+
+      })
       .catch(err => next(err));
     }
 
   }// END: newWasher
-
-  getNext(req, res, next){
-    return userFacade.fetchNames()
-    .then(function(collection){
-      return selectNext(collection);
-    })
-    .then(collection => res.status(200).json(collection))
-    .catch(err => next(err));
-  }// END: getNext
-
-  fetchNames(req, res, next){
-    return userFacade.fetchNames()
-    .then(collection => res.status(200).json(collection))
-    .catch(err => next(err));
-  }// END: fetchNames
 }
 
 module.exports = new UserController(userFacade);

@@ -16,6 +16,6 @@ router.route('/washer')
   .get((...args) => controller.getNext(...args));
 
 router.route('/names')
-  .get((...args) => controller.fetchNames(...args));
+  .get((...args) => controller.getHistory(...args));
 
 module.exports = router;
