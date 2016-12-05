@@ -131,6 +131,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/newWasher'
+        - name: afk
+          in: query
+          description: To set the user afk
+          required: true
+          type: string
       responses:
         '200':
           description: user response

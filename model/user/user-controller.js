@@ -9,6 +9,10 @@ const findSchema = {
   name:{
     in: 'body',
     optional: false
+  },
+  afk:{
+    in: 'query',
+    optional: false
   }
 };
 
@@ -34,6 +38,7 @@ function checkParam(req, params) {
   }
 
   return { message: null, code: 200 };
+
 }// END: checkParam
 
 
@@ -45,7 +50,9 @@ function collectionToArrayName(collection){
   arrayUser = arrayUser.sort();
 
   return arrayUser;
-}
+
+}// END: collectionToArrayName
+
 function selectNext(collection){
 
   let arrayUser = collectionToArrayName(collection);
@@ -64,6 +71,7 @@ function selectNext(collection){
   const indexNext = (arrayUser.indexOf(lastWasher) + 1) % arrayUser.length;
   const nameNext = arrayUser[indexNext];
   return nameNext;
+
 }// END: selectNext
 
 class UserController extends Controller {
@@ -107,7 +115,7 @@ class UserController extends Controller {
     })
     .then(collection => res.status(200).json(collection))
     .catch(err => next(err));
-  }
+  }// END: getHistory
 
   getNext(req, res, next){
     return userFacade.fetchNames()
@@ -131,12 +139,9 @@ class UserController extends Controller {
     if (resCheck.code !== 200) {
       res.status(resCheck.code).send(resCheck.message);
     } else {
-
       return userFacade.fetchNames()
       .then(function(collection){
-
         var arrayUser = collectionToArrayName(collection);
-
         //User not found
         if(arrayUser.indexOf(req.body.name) === -1){
           res.status(400).send('No user found with this name');
@@ -146,22 +151,22 @@ class UserController extends Controller {
           return req.body.name;
         }
       })
-      .then(username => userFacade.insertWasher(username))
+      .then(function(username){
+        if(req.query.afk && req.query.afk === 'false')
+          userFacade.insertWasher(username);
+      })
       .then(function(doc){
-
         var name =  userFacade.fetchNames()
         .then(function(collection){
           var name = selectNext(collection);
           console.log(name);
           return res.status(201).json(name);
         });
-
-
       })
       .catch(err => next(err));
     }
-
   }// END: newWasher
+
 }
 
 module.exports = new UserController(userFacade);
